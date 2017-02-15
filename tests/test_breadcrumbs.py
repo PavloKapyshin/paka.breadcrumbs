@@ -1,4 +1,8 @@
 import unittest
+try:
+    from itertools import zip_longest
+except ImportError:
+    from itertools import izip_longest as zip_longest
 
 from paka.breadcrumbs import Bread, Crumb
 
@@ -64,9 +68,79 @@ class BreadcrumbsTest(unittest.TestCase):
         self.assertIsNone(test_crumb.url_path)
         self.assertEqual(test_crumb.extra, {})
 
+    def test_adding_crumb(self):
+        expected_crumb = Crumb(
+            "Crumb here", heading="H", url_path="url", extra={1: 2})
+        bcrumbs = Bread(self.site_name)
+        bcrumbs.add_crumb(expected_crumb)
+        site_crumb, test_crumb = bcrumbs
+        self.assertEqual(expected_crumb, test_crumb)
+
+    def test_from_crumb(self):
+        expected_crumb = Crumb(
+            "Crumb here", heading="H", url_path="url", extra={1: 2})
+        bcrumbs = Bread.from_crumb(expected_crumb)
+        crumb, = bcrumbs
+        self.assertEqual(expected_crumb, crumb)
+
+    def test_from_crumbs(self):
+        crumbs = (
+            Crumb(self.site_name, extra={1: "one"}, url_path="/"),
+            Crumb("Second", url_path="/second/"),
+            Crumb("Third"))
+        bcrumbs = Bread.from_crumbs(crumbs)
+        for expected, actual in zip_longest(crumbs, bcrumbs):
+            self.assertEqual(expected, actual)
+
+    def test_from_empty_crumbs(self):
+        with self.assertRaises(ValueError):
+            Bread.from_crumbs(())
+
 
 class CrumbTest(unittest.TestCase):
 
     def test_empty_url_path_results_in_none(self):
         crumb = Crumb("label", url_path="")
         self.assertIsNone(crumb.url_path)
+
+    def test_equality_defaults(self):
+        args, kwargs = ("a", ), {}
+        crumb_a = Crumb(*args, **kwargs)
+        crumb_b = Crumb(*args, **kwargs)
+        self.assertEqual(crumb_a, crumb_b)
+
+    def test_equality_same_kwargs(self):
+        kwargs = {
+            "label": "Some label", "url_path": "/url/path",
+            "heading": "Same", "extra": {0: 1}}
+        crumb_a = Crumb(**kwargs)
+        crumb_b = Crumb(**kwargs)
+        self.assertEqual(crumb_a, crumb_b)
+
+    def test_equality_different_label(self):
+        same_kwargs = {
+            "url_path": "/url/path", "heading": "Same", "extra": {1: 2}}
+        crumb_a = Crumb(label="a", **same_kwargs)
+        crumb_b = Crumb(label="b", **same_kwargs)
+        self.assertNotEqual(crumb_a, crumb_b)
+
+    def test_equality_different_url_path(self):
+        same_kwargs = {
+            "label": "Same", "heading": "Same too", "extra": {3: 4}}
+        crumb_a = Crumb(url_path="a", **same_kwargs)
+        crumb_b = Crumb(url_path="b", **same_kwargs)
+        self.assertNotEqual(crumb_a, crumb_b)
+
+    def test_equality_different_heading(self):
+        same_kwargs = {
+            "url_path": "/url/path", "label": "Same", "extra": {5: 6}}
+        crumb_a = Crumb(heading="a", **same_kwargs)
+        crumb_b = Crumb(heading="b", **same_kwargs)
+        self.assertNotEqual(crumb_a, crumb_b)
+
+    def test_equality_different_extra(self):
+        same_kwargs = {
+            "url_path": "/url/path", "heading": "Same", "label": "Same too"}
+        crumb_a = Crumb(extra={"a": 1}, **same_kwargs)
+        crumb_b = Crumb(extra={"b": 2}, **same_kwargs)
+        self.assertNotEqual(crumb_a, crumb_b)

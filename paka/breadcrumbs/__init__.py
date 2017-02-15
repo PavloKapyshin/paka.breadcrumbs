@@ -6,6 +6,12 @@ except ImportError:  # pragma: no cover
     from collections import Sequence
 
 
+def _crumb_to_kwargs(crumb):
+    return {
+        "label": crumb.label, "heading": crumb.heading,
+        "url_path": crumb.url_path, "extra": crumb.extra}
+
+
 class Crumb(object):  # pylint: disable=too-few-public-methods
     """Item of :py:class:`Bread`."""
 
@@ -32,6 +38,10 @@ class Crumb(object):  # pylint: disable=too-few-public-methods
         self.url_path = url_path or None
         self.heading = heading or label
         self.extra = extra or {}
+
+    def __eq__(self, other):
+        """Check fields of other are equal to fields of self."""
+        return _crumb_to_kwargs(self) == _crumb_to_kwargs(other)
 
 
 class Bread(Sequence):
@@ -83,3 +93,30 @@ class Bread(Sequence):
 
         """
         self._crumbs.append(Crumb(*args, **kwargs))
+
+    def add_crumb(self, crumb):
+        """"Add" (append) instance of :py:class:`Crumb`."""
+        self._crumbs.append(crumb)
+
+    @classmethod
+    def from_crumb(cls, crumb):
+        """Create sequence with one (initial) crumb.
+
+        Parameters
+        ----------
+        crumb: Crumb
+            Initial crumb.
+
+        """
+        return cls(**_crumb_to_kwargs(crumb))
+
+    @classmethod
+    def from_crumbs(cls, crumbs):
+        r"""Create sequence from sequence of :py:class:`Crumb`\ s."""
+        crumbs = tuple(crumbs)
+        if not crumbs:
+            raise ValueError("crumbs must have at least one item")
+        bcrumbs = cls.from_crumb(crumbs[0])
+        for crumb in crumbs[1:]:
+            bcrumbs.add_crumb(crumb)
+        return bcrumbs

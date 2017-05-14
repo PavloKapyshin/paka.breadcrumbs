@@ -3,7 +3,7 @@ import setuptools
 
 setuptools.setup(
     name="paka.breadcrumbs",
-    version="1.1.0",
+    version="1.2.0",
     packages=setuptools.find_packages(),
     install_requires=[],
     extras_require={"testing": []},

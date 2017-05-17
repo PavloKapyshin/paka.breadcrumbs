@@ -53,6 +53,21 @@ you can use ``pip`` for installation:
     $ pip install paka.breadcrumbs
 
 
+Getting documentation
+---------------------
+Build HTML docs:
+
+.. code-block:: console
+
+    $ tox -e docs
+
+View built docs:
+
+.. code-block:: console
+
+    $ sensible-browser .tox/docs/tmp/docs_html/index.html
+
+
 Running tests
 -------------
 .. code-block:: console
@@ -82,18 +97,3 @@ Run code checkers:
 .. code-block:: console
 
     $ tox -e checks
-
-
-Getting documentation
----------------------
-Build HTML docs:
-
-.. code-block:: console
-
-    $ tox -e docs
-
-View built docs:
-
-.. code-block:: console
-
-    $ sensible-browser .tox/docs/tmp/docs_html/index.html

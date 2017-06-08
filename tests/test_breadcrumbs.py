@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+
+from __future__ import unicode_literals
+
 import unittest
 try:
     from itertools import zip_longest
@@ -95,6 +99,65 @@ class BreadcrumbsTest(unittest.TestCase):
     def test_from_empty_crumbs(self):
         with self.assertRaises(ValueError):
             Bread.from_crumbs(())
+
+
+class BreadcrumbsTitleTest(unittest.TestCase):
+
+    def setUp(self):
+        from markupsafe import Markup
+        from mako.template import Template
+
+        self.markup_class = Markup
+        self.template_class = Template
+        self.site_name = "Some site Name"
+
+    def test_getting_title_with_one_crumb(self):
+        bcrumbs = Bread(self.site_name)
+        result = bcrumbs.get_title("←")
+        self.assertEqual(result, self.site_name)
+        self.assertIsInstance(result, self.markup_class)
+
+    def test_getting_title_with_several_crumbs(self):
+        bcrumbs = Bread(self.site_name)
+        bcrumbs.add("Subsection", heading="something", url_path="/sub")
+        bcrumbs.add("<sub-sub>", heading="Subsubsection", url_path="/sub/sub")
+        bcrumbs.add("here")
+
+        cases = (
+            ("sep", "here sep &lt;sub-sub&gt; sep Subsection sep {}"),
+            ("←", "here ← &lt;sub-sub&gt; ← Subsection ← {}"),
+            ("<", "here &lt; &lt;sub-sub&gt; &lt; Subsection &lt; {}"),
+            (
+                "&lt;",
+                "here &amp;lt; &lt;sub-sub&gt; "
+                "&amp;lt; Subsection &amp;lt; {}"),
+            (
+                self.markup_class("&lt;"),
+                "here &lt; &lt;sub-sub&gt; &lt; Subsection &lt; {}"))
+        for sep, tmpl in cases:
+            result = bcrumbs.get_title(sep)
+            self.assertIsInstance(result, self.markup_class)
+            self.assertEqual(result, tmpl.format(self.site_name))
+
+    def test_template_rendering(self):
+        bcrumbs = Bread(self.site_name)
+        bcrumbs.add("Subsection", heading="something", url_path="/sub")
+        bcrumbs.add("<sub-sub>", heading="Subsubsection", url_path="/sub/sub")
+        bcrumbs.add("here")
+
+        title = bcrumbs.get_title("<")
+        expected = (
+            "<title>here &lt; &lt;sub-sub&gt; &lt; Subsection "
+            "&lt; {}</title>").format(self.site_name)
+        template_string = "<title>${title}</title>"
+
+        self.assertEqual(
+            self.template_class(
+                template_string, default_filters=["h"]).render(title=title),
+            expected)
+        self.assertEqual(
+            self.template_class(template_string).render(title=title),
+            expected)
 
 
 class CrumbTest(unittest.TestCase):

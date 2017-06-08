@@ -1,9 +1,18 @@
 """Helpers for breadcrumbs navigation building."""
 
+from __future__ import unicode_literals
+
+import operator
 try:
     from collections.abc import Sequence
 except ImportError:  # pragma: no cover
     from collections import Sequence
+try:
+    from itertools import imap
+except ImportError:
+    imap = map  # pylint: disable=invalid-name
+
+import markupsafe
 
 
 def _crumb_to_kwargs(crumb):
@@ -42,6 +51,9 @@ class Crumb(object):  # pylint: disable=too-few-public-methods
     def __eq__(self, other):
         """Check fields of other are equal to fields of self."""
         return _crumb_to_kwargs(self) == _crumb_to_kwargs(other)
+
+
+_get_crumb_label = operator.attrgetter("label")  # pylint: disable=invalid-name
 
 
 class Bread(Sequence):
@@ -97,6 +109,25 @@ class Bread(Sequence):
     def add_crumb(self, crumb):
         """Append instance of :py:class:`Crumb`."""
         self._crumbs.append(crumb)
+
+    def get_title(self, separator):
+        """Return crumb labels joined by separator & spaces in reverse order.
+
+        Parameters
+        ----------
+        separator: str or markupsafe.Markup
+            String to put between labels.
+
+        Returns
+        -------
+        markupsafe.Markup
+            Escaped string suitable for putting into HTML ``title``.
+
+        """
+        escape = markupsafe.escape
+        labels = imap(escape, imap(_get_crumb_label, reversed(self._crumbs)))
+        return markupsafe.Markup(
+            " {} ".format(escape(separator)).join(labels))
 
     @classmethod
     def from_crumb(cls, crumb):

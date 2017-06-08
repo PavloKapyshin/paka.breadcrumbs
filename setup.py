@@ -3,10 +3,10 @@ import setuptools
 
 setuptools.setup(
     name="paka.breadcrumbs",
-    version="1.2.2",
+    version="1.3.0",
     packages=setuptools.find_packages(),
-    install_requires=[],
-    extras_require={"testing": []},
+    install_requires=["markupsafe"],
+    extras_require={"testing": ["mako"]},
     include_package_data=True,
     namespace_packages=["paka"],
     zip_safe=False,

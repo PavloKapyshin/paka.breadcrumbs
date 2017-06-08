@@ -84,7 +84,7 @@ class Bread(Sequence):
         return len(self._crumbs)
 
     def add(self, *args, **kwargs):
-        """Create and "add" (append) crumb.
+        """Create and append crumb.
 
         Note
         ----
@@ -95,7 +95,7 @@ class Bread(Sequence):
         self._crumbs.append(Crumb(*args, **kwargs))
 
     def add_crumb(self, crumb):
-        """"Add" (append) instance of :py:class:`Crumb`."""
+        """Append instance of :py:class:`Crumb`."""
         self._crumbs.append(crumb)
 
     @classmethod

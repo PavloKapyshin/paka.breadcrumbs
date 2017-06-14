@@ -3,7 +3,7 @@ import setuptools
 
 setuptools.setup(
     name="paka.breadcrumbs",
-    version="1.3.0",
+    version="1.3.1",
     packages=setuptools.find_packages(),
     install_requires=["markupsafe"],
     extras_require={"testing": ["mako"]},

@@ -45,7 +45,7 @@ Now breadcrumbs container can be iterated over:
 And value you can put into ``<title></title>`` may be constructed
 (it is actually an instance of ``markupsafe.Markup``):
 
-.. code-block: pycon
+.. code-block:: pycon
 
     >>> print(bcrumbs.get_title("<-"))
     Some page &lt;- Some category &lt;- Example Site
